@@ -62,7 +62,7 @@ class CalcParser(Parser):
         return p.NUMBER
 
 # Streamlit UI
-st.title("🧮 PLC Calculator")
+st.title("🧮 PLC simple Calculator")
 expression = st.text_input("Enter expression:")
 
 if st.button("Calculate"):
