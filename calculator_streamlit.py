@@ -147,8 +147,7 @@ h1, h2, h3, .stSelectbox label {
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- Streamlit UI ----------
-st.title("🎨 Multi-Mode Colorful Calculator")
+st.title("🎨 Multi-Mode Calculator")
 
 calc_mode = st.selectbox("🧠 Select Calculation Mode", ["Simple Calculator", "Infix Notation", "Prefix Notation", "Postfix Notation"])
 
