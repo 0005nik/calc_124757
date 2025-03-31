@@ -1,86 +1,122 @@
-st.markdown("""
-<style>
-/* Global background gradient and font */
-html, body, [class*="css"] {
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%);
-    color: #1e293b;
-    transition: all 0.3s ease-in-out;
-}
+import streamlit as st
+from sly import Lexer, Parser
 
-/* Title styling */
-h1 {
-    color: #1f2937;
-    font-weight: 700;
-    font-size: 42px;
-    text-align: center;
-    padding-bottom: 10px;
-    margin-top: 0px;
-}
+# Lexer (Lexical Analysis)
+class CalcLexer(Lexer):
+    tokens = {NUMBER, PLUS, MINUS, TIMES, DIVIDE, LPAREN, RPAREN}
+    ignore = ' \t'
 
-/* Input field styling */
-.stTextInput > div > div > input {
-    background: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(5px);
-    border: 2px solid #93c5fd;
-    padding: 12px 14px;
-    border-radius: 12px;
-    color: #111827;
-    font-size: 16px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-}
+    # Support negative numbers
+    NUMBER = r'-?\d+'
+    PLUS = r'\+'
+    MINUS = r'-'
+    TIMES = r'\*'
+    DIVIDE = r'/'
+    LPAREN = r'\('
+    RPAREN = r'\)'
 
-/* Button styling */
-.stButton > button {
-    background: linear-gradient(to right, #8b5cf6, #ec4899);
-    color: white;
-    font-weight: 600;
-    font-size: 16px;
-    border-radius: 12px;
-    padding: 10px 24px;
-    border: none;
-    transition: 0.3s ease;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-}
-.stButton > button:hover {
-    background: linear-gradient(to right, #7c3aed, #f472b6);
-    transform: scale(1.05);
-}
+    def NUMBER(self, t):
+        t.value = int(t.value)
+        return t
 
-/* Result box */
-.result-box {
-    background: rgba(240, 253, 244, 0.75);
-    backdrop-filter: blur(8px);
-    padding: 20px;
-    border-left: 6px solid #10b981;
-    border-radius: 14px;
-    font-weight: 600;
-    font-size: 18px;
-    margin-top: 20px;
-    color: #064e3b;
-    box-shadow: 0 5px 12px rgba(0,0,0,0.07);
-}
+# Parser (Syntax Analysis) supporting Prefix and Infix Notation
+class CalcParser(Parser):
+    tokens = CalcLexer.tokens
 
-/* Error box */
-.error-box {
-    background: rgba(254, 226, 226, 0.75);
-    backdrop-filter: blur(8px);
-    padding: 20px;
-    border-left: 6px solid #ef4444;
-    border-radius: 14px;
-    font-weight: 600;
-    font-size: 18px;
-    margin-top: 20px;
-    color: #7f1d1d;
-    box-shadow: 0 5px 12px rgba(0,0,0,0.07);
-}
+    precedence = (
+        ('left', PLUS, MINUS),
+        ('left', TIMES, DIVIDE),
+        ('right', 'UMINUS'),
+    )
 
-/* Footer */
-.footer {
-    font-size: 15px;
-    color: #6b7280;
-    margin-top: 40px;
-    text-align: center;
-}
-</style>
-""", unsafe_allow_html=True)
+    @_('expr')
+    def statement(self, p):
+        return p.expr
+
+    @_('')
+    def statement(self, p):
+        return None
+
+    # Infix notation (4 + 6)
+    @_('expr PLUS expr')
+    def expr(self, p):
+        return p.expr0 + p.expr1
+
+    @_('expr MINUS expr')
+    def expr(self, p):
+        return p.expr0 - p.expr1
+
+    @_('expr TIMES expr')
+    def expr(self, p):
+        return p.expr0 * p.expr1
+
+    @_('expr DIVIDE expr')
+    def expr(self, p):
+        return p.expr0 / p.expr1 if p.expr1 != 0 else "Error: Division by zero"
+
+    @_('MINUS expr %prec UMINUS')
+    def expr(self, p):
+        return -p.expr
+
+    @_('LPAREN expr RPAREN')
+    def expr(self, p):
+        return p.expr
+
+    @_('NUMBER')
+    def expr(self, p):
+        return p.NUMBER
+
+    # Prefix notation support (+ 4 6 → 4 + 6)
+    @_('PLUS expr expr')
+    def expr(self, p):
+        return p.expr0 + p.expr1
+
+    @_('MINUS expr expr')
+    def expr(self, p):
+        return p.expr0 - p.expr1
+
+    @_('TIMES expr expr')
+    def expr(self, p):
+        return p.expr0 * p.expr1
+
+    @_('DIVIDE expr expr')
+    def expr(self, p):
+        return p.expr0 / p.expr1 if p.expr1 != 0 else "Error: Division by zero"
+
+    # Handling single operators at start of input (+ 4 6)
+    @_('PLUS NUMBER NUMBER')
+    def expr(self, p):
+        return p.NUMBER0 + p.NUMBER1
+
+    @_('MINUS NUMBER NUMBER')
+    def expr(self, p):
+        return p.NUMBER0 - p.NUMBER1
+
+    @_('TIMES NUMBER NUMBER')
+    def expr(self, p):
+        return p.NUMBER0 * p.NUMBER1
+
+    @_('DIVIDE NUMBER NUMBER')
+    def expr(self, p):
+        return p.NUMBER0 / p.NUMBER1 if p.NUMBER1 != 0 else "Error: Division by zero"
+
+# Streamlit UI
+st.set_page_config(page_title="PPI Calculator", page_icon="🧮", layout="centered")
+
+st.markdown("<h1 style='text-align: center;'>🧮 PPI Calculator</h1>", unsafe_allow_html=True)
+
+expression = st.text_input("Enter Expression:", placeholder="e.g., 3 + 5 * (2 - 1) or + 4 6")
+
+if st.button("Calculate 🧮"):
+    lexer = CalcLexer()
+    parser = CalcParser()
+    
+    try:
+        tokens = iter(lexer.tokenize(expression))
+        result = parser.parse(tokens)
+        if result is not None:
+            st.success(f"✅ Result: {result}")
+        else:
+            st.error("❌ Invalid expression!")
+    except Exception as e:
+        st.error(f"❌ Error: {e}")
