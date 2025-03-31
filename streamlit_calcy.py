@@ -123,7 +123,7 @@ class CalcParser(Parser):
 
 # ---- 🎨 Streamlit UI ----
 st.markdown("<h1 style='text-align:center;'>🧮✨ PLC Calculator 🎈</h1>", unsafe_allow_html=True)
-st.markdown("### 💬 Type your math expression below (Infix, Prefix, or Postfix)")
+st.markdown("### 💬")
 
 expression = st.text_input("🔢 Your Expression")
 
