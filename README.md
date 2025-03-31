@@ -1,4 +1,4 @@
-# Streamlit Calculator
+#  Calculator
 
 ## Overview
 This is a simple yet powerful calculator built using Streamlit and SLY (Simple Lex-Yacc). The calculator supports:
@@ -90,7 +90,87 @@ The translation method follows these steps:
    ```sh
    streamlit run app.py
    ```
+Certainly! Here's a clear **"How to Use"** section you can add to your README (or use separately in documentation or a guide):
 
+---
+
+## 📗 How to Use the Calculator
+
+This calculator is interactive and easy to use. Once the application is running, you’ll see a clean, user-friendly interface built with Streamlit.
+
+### Step-by-Step Instructions
+
+### 1. **Launch the Application**
+- Open terminal or command prompt
+- Run:
+  ```bash
+  streamlit run app.py
+  ```
+- This will open the app in your default web browser
+
+---
+
+### 2. **Choose Calculation Mode**
+At the top of the interface, you’ll find a dropdown labeled:
+
+```
+Select Calculation Mode
+```
+
+Choose from:
+- `Simple Calculator`
+- `Infix Notation`
+- `Postfix Notation`
+- `Prefix Notation`
+
+---
+
+### 3. **Input Your Expression**
+#### If you chose:
+
+#### ✅ Simple Calculator:
+- Two text fields will appear:
+  - First Number
+  - Second Number
+- Choose an operation (`+`, `-`, `*`, `/`) from the dropdown
+- Click the **"Calculate"** button to see the result
+
+#### ✅ Infix Notation:
+- Enter a math expression like:
+  ```
+  (3 + 4) * 5 - 2
+  ```
+- Then click **"Calculate"**
+
+#### ✅ Postfix Notation:
+- Enter a space-separated expression like:
+  ```
+  3 4 5 * +
+  ```
+- Then click **"Calculate"**
+
+#### ✅ Prefix Notation:
+- Enter a space-separated expression like:
+  ```
+  + 3 * 4 5
+  ```
+- Then click **"Calculate"**
+
+---
+
+### 4. **View the Result**
+- If the expression is valid, the result will appear in a highlighted success box.
+- If there's an error (e.g. division by zero or syntax error), an error message will be shown instead.
+
+---
+
+### 5. **Try More Expressions**
+- Modify the expression or switch modes to evaluate more types.
+- All interactions are instant and responsive in real-time thanks to Streamlit.
+
+---
+
+Let me know if you’d like this “How to Use” section added directly to your Word report or embedded into the code as a docstring.
 ## Future Improvements
 - Add history tracking for calculations.
 - Support for additional scientific operations.
