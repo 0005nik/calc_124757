@@ -66,42 +66,42 @@ st.set_page_config(page_title="Calculator", page_icon="🧮", layout="centered")
 st.markdown("""
 <style>
 body {
-    background: linear-gradient(to right, #667eea, #764ba2);
-    color: #FFFFFF;
+    background: linear-gradient(to right, #a8edea, #fed6e3);
     font-family: 'Segoe UI', sans-serif;
 }
 .stApp {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: rgba(255, 255, 255, 0.9);
     border-radius: 20px;
-    padding: 30px;
+    padding: 40px;
     margin: 0 auto;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 h1, .stMarkdown {
     text-align: center;
-    color: #ffffff;
+    color: #222;
 }
 .stTextInput>div>div>input {
-    font-size: 18px;
+    font-size: 20px;
     text-align: center;
-    background-color: rgba(255,255,255,0.1);
-    color: #ffffff;
-    border: 2px solid #ffffff33;
+    background-color: #ffffff;
+    color: #222;
+    border: 2px solid #ccc;
     border-radius: 10px;
     padding: 12px;
 }
 .stButton>button {
-    background-color: #ffffff33;
+    background: #28c76f;
     color: #fff;
     font-size: 18px;
     border-radius: 10px;
     padding: 10px 24px;
     border: none;
     cursor: pointer;
-    transition: 0.3s ease;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease;
 }
 .stButton>button:hover {
-    background-color: #ffffff55;
+    background-color: #20b863;
 }
 .stAlert {
     font-size: 18px;
@@ -111,9 +111,9 @@ h1, .stMarkdown {
 """, unsafe_allow_html=True)
 
 st.title("🧮 Simple PLC Calculator")
-st.markdown("Type any arithmetic expression and hit **Calculate**")
+st.markdown("Enter a math expression and click **Calculate**:")
 
-expression = st.text_input("Expression", placeholder="e.g., 3 + 5 * (2 - 1)")
+expression = st.text_input("Expression", placeholder="e.g., 10 + 2 * (5 - 3)")
 
 if st.button("Calculate"):
     lexer = CalcLexer()
