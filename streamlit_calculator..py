@@ -108,7 +108,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.title("🧮 Simple Calculator")
+st.title("🧮 Simple plc Calculator")
 st.markdown("Enter your mathematical expression below and press Calculate.")
 
 expression = st.text_input("Expression", placeholder="e.g., 3 + 5 * (2 - 1)")
