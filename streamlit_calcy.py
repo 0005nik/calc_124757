@@ -8,63 +8,69 @@ st.markdown(
     <style>
     html, body, [class*="css"] {
         font-family: 'Segoe UI', sans-serif;
-        background-color: #fefce8;
+        background: linear-gradient(to right, #fffbe6, #fdf2f8);
     }
 
-    h1, h3 {
-        color: #1e293b;
+    h1 {
+        color: #0f172a;
+        text-shadow: 1px 1px 0px #facc15;
     }
 
     .stTextInput > div > div > input {
         background-color: #fff;
-        border: 2px solid #fbbf24;
-        padding: 10px;
-        border-radius: 8px;
+        border: 2px solid #a78bfa;
+        padding: 12px;
+        border-radius: 10px;
         color: #1e293b;
         font-size: 16px;
     }
 
     .stButton > button {
-        background-color: #f59e0b;
+        background: linear-gradient(to right, #f59e0b, #ec4899);
         color: white;
         font-weight: bold;
         border-radius: 8px;
-        padding: 8px 16px;
+        padding: 10px 20px;
         font-size: 16px;
-        transition: background-color 0.3s ease;
+        transition: 0.2s ease;
+        box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
     }
 
     .stButton > button:hover {
-        background-color: #d97706;
-    }
-
-    .stMarkdown {
-        font-size: 18px;
+        background: linear-gradient(to right, #eab308, #d946ef);
+        transform: scale(1.03);
     }
 
     .result-box {
-        background-color: #ecfccb;
+        background: linear-gradient(to right, #d1fae5, #a7f3d0);
         padding: 16px;
-        border-left: 5px solid #65a30d;
-        border-radius: 8px;
+        border-left: 5px solid #10b981;
+        border-radius: 10px;
         font-weight: bold;
-        color: #365314;
+        color: #064e3b;
     }
 
     .error-box {
-        background-color: #fee2e2;
+        background: linear-gradient(to right, #fee2e2, #fecaca);
         padding: 16px;
-        border-left: 5px solid #dc2626;
-        border-radius: 8px;
+        border-left: 5px solid #ef4444;
+        border-radius: 10px;
         font-weight: bold;
         color: #991b1b;
+    }
+
+    .footer {
+        font-size: 15px;
+        color: #6b7280;
+        margin-top: 30px;
+        text-align: center;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-# ---- 🧠 Lexer ----
+# ---- 🧠 Lexer & Parser (เหมือนเดิม) ----
 class CalcLexer(Lexer):
     tokens = {NUMBER, PLUS, MINUS, TIMES, DIVIDE, LPAREN, RPAREN}
     ignore = ' \t'
@@ -81,10 +87,8 @@ class CalcLexer(Lexer):
         t.value = int(t.value)
         return t
 
-# ---- 🧠 Parser ----
 class CalcParser(Parser):
     tokens = CalcLexer.tokens
-
     precedence = (
         ('left', PLUS, MINUS),
         ('left', TIMES, DIVIDE),
@@ -156,11 +160,11 @@ class CalcParser(Parser):
                     stack.append(a / b if b != 0 else "💥 Error: Division by zero")
         return stack[0] if stack else "❌ Error: Invalid Expression"
 
-# ---- 🎨 Streamlit UI ----
+# ---- 🌈 Streamlit UI ----
 st.markdown("<h1 style='text-align:center;'>🧮 PLC Calculator 🎈</h1>", unsafe_allow_html=True)
-st.markdown("### 💬 Enter an expression (Infix, Prefix, or Postfix):")
+st.markdown("### 🎨 Try Infix (2+3), Prefix (+ 2 3), or Postfix (2 3 +):")
 
-expression = st.text_input("🔢 Your Expression")
+expression = st.text_input("🔢 Enter your Expression:")
 
 if st.button("🚀 Calculate"):
     lexer = CalcLexer()
@@ -178,8 +182,6 @@ if st.button("🚀 Calculate"):
             result = parser.parse(tokens)
             st.markdown(f"<div class='result-box'>📘 <strong>Infix Result</strong>: {result}</div>", unsafe_allow_html=True)
     except Exception as e:
-        st.markdown(f"<div class='error-box'>🚫 Something went wrong: {e}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='error-box'>🚫 Error: {e}</div>", unsafe_allow_html=True)
 
-st.markdown("---")
-st.markdown("🧑‍💻 _Supports Infix (`2+3`), Prefix (`+ 2 3`), and Postfix (`2 3 +`)_")
-st.markdown("💖 Made for Math Enthusiasts with ✨")
+st.markdown("<div class='footer'>💖 Coded with love — Have fun computing!</div>", unsafe_allow_html=True)
