@@ -1,12 +1,10 @@
 import streamlit as st
 from sly import Lexer, Parser
 
-# Lexer (Lexical Analysis)
+# Lexer
 class CalcLexer(Lexer):
     tokens = {NUMBER, PLUS, MINUS, TIMES, DIVIDE, LPAREN, RPAREN}
     ignore = ' \t'
-
-    # Support negative numbers
     NUMBER = r'-?\d+'
     PLUS = r'\+'
     MINUS = r'-'
@@ -19,10 +17,9 @@ class CalcLexer(Lexer):
         t.value = int(t.value)
         return t
 
-# Parser (Syntax Analysis)
+# Parser
 class CalcParser(Parser):
     tokens = CalcLexer.tokens
-    
     precedence = (
         ('left', PLUS, MINUS),
         ('left', TIMES, DIVIDE),
@@ -30,138 +27,113 @@ class CalcParser(Parser):
     )
 
     @_('expr')
-    def statement(self, p):
-        return p.expr
-    
+    def statement(self, p): return p.expr
+
     @_('')
-    def statement(self, p):
-        return None  # Handles empty input
-    
+    def statement(self, p): return None
+
     @_('expr PLUS expr')
-    def expr(self, p):
-        return p.expr0 + p.expr1
-    
+    def expr(self, p): return p.expr0 + p.expr1
+
     @_('expr MINUS expr')
-    def expr(self, p):
-        return p.expr0 - p.expr1
-    
+    def expr(self, p): return p.expr0 - p.expr1
+
     @_('expr TIMES expr')
-    def expr(self, p):
-        return p.expr0 * p.expr1
-    
+    def expr(self, p): return p.expr0 * p.expr1
+
     @_('expr DIVIDE expr')
-    def expr(self, p):
-        return p.expr0 / p.expr1 if p.expr1 != 0 else "Error: Division by zero"
-    
+    def expr(self, p): return p.expr0 / p.expr1 if p.expr1 != 0 else "Error: Division by zero"
+
     @_('MINUS expr %prec UMINUS')
-    def expr(self, p):
-        return -p.expr
+    def expr(self, p): return -p.expr
 
     @_('LPAREN expr RPAREN')
-    def expr(self, p):
-        return p.expr
-    
-    @_('NUMBER')
-    def expr(self, p):
-        return p.NUMBER
+    def expr(self, p): return p.expr
 
-    # Postfix Expression Handling
+    @_('NUMBER')
+    def expr(self, p): return p.NUMBER
+
     def parse_postfix(self, expr):
         stack = []
         tokens = expr.split()
-
         for token in tokens:
-            if token.lstrip('-').isdigit():  # Handles negative numbers
+            if token.lstrip('-').isdigit():
                 stack.append(int(token))
             elif token in ('+', '-', '*', '/'):
-                if len(stack) < 2:
-                    return "Error: Invalid Expression"
-                b = stack.pop()
-                a = stack.pop()
-                if token == '+':
-                    stack.append(a + b)
-                elif token == '-':
-                    stack.append(a - b)
-                elif token == '*':
-                    stack.append(a * b)
-                elif token == '/':
-                    stack.append(a / b if b != 0 else "Error: Division by zero")
-        return stack[0] if stack else "Error: Invalid Expression"
+                if len(stack) < 2: return "Error: Invalid Expression"
+                b = stack.pop(); a = stack.pop()
+                stack.append(eval(f"{a}{token}{b}") if token != '/' or b != 0 else "Error: Division by zero")
+        return stack[0] if stack else "Error"
 
-    # Prefix Expression Handling
     def parse_prefix(self, expr):
         stack = []
-        tokens = expr.split()[::-1]  # Reverse the tokens for prefix processing
-
+        tokens = expr.split()[::-1]
         for token in tokens:
-            if token.lstrip('-').isdigit():  # Handles negative numbers
+            if token.lstrip('-').isdigit():
                 stack.append(int(token))
             elif token in ('+', '-', '*', '/'):
-                if len(stack) < 2:
-                    return "Error: Invalid Expression"
-                a = stack.pop()
-                b = stack.pop()
-                if token == '+':
-                    stack.append(a + b)
-                elif token == '-':
-                    stack.append(a - b)
-                elif token == '*':
-                    stack.append(a * b)
-                elif token == '/':
-                    stack.append(a / b if b != 0 else "Error: Division by zero")
-        return stack[0] if stack else "Error: Invalid Expression"
+                if len(stack) < 2: return "Error: Invalid Expression"
+                a = stack.pop(); b = stack.pop()
+                stack.append(eval(f"{a}{token}{b}") if token != '/' or b != 0 else "Error: Division by zero")
+        return stack[0] if stack else "Error"
 
-    # Simple Calculator for Two Numbers
-    def simple_calculator(self, num1, num2, operation):
-        try:
-            num1, num2 = float(num1), float(num2)
-            if operation == '+':
-                return num1 + num2
-            elif operation == '-':
-                return num1 - num2
-            elif operation == '*':
-                return num1 * num2
-            elif operation == '/':
-                return num1 / num2 if num2 != 0 else "Error: Division by zero"
-        except ValueError:
-            return "Error: Invalid Input"
+# --- Streamlit UI ---
+st.set_page_config(page_title="🧮 Button-Based Calculator", layout="centered")
+st.title("🧮 Calculator with Buttons")
+st.caption("Supports Infix, Prefix, Postfix")
 
-# Streamlit UI
-st.title("🧮  Multi-Mode Calculator")
+# Session State Setup
+if "expression" not in st.session_state:
+    st.session_state.expression = ""
 
-# Dropdown to select mode
-calc_mode = st.selectbox("Select Calculation Mode", ["Simple Calculator", "Infix Notation", "Prefix Notation", "Postfix Notation"])
+# Expression Display
+st.text_input("Expression", value=st.session_state.expression, key="display", disabled=True)
 
-# UI based on mode
+# Button Layout
+cols = st.columns(4)
+buttons = [
+    ("7", "8", "9", "/"),
+    ("4", "5", "6", "*"),
+    ("1", "2", "3", "-"),
+    ("0", "(", ")", "+")
+]
+
+for row in buttons:
+    cols = st.columns(4)
+    for i, label in enumerate(row):
+        if cols[i].button(label):
+            st.session_state.expression += label
+
+# Second row: Clear and Delete
+cols2 = st.columns([1, 1, 1])
+if cols2[0].button("AC"):
+    st.session_state.expression = ""
+elif cols2[1].button("⌫"):
+    st.session_state.expression = st.session_state.expression[:-1]
+
+# Mode Buttons
 parser = CalcParser()
+mode_cols = st.columns(3)
 
-if calc_mode == "Simple Calculator":
-    num1 = st.text_input("Enter first number:")
-    num2 = st.text_input("Enter second number:")
-    operation = st.selectbox("Select operation", ["+", "-", "*", "/"])
-    
-    if st.button("Calculate"):
-        result = parser.simple_calculator(num1, num2, operation)
-        st.success(f"Result: {result}")
+if mode_cols[0].button("🧠 Infix"):
+    try:
+        lexer = CalcLexer()
+        tokens = iter(lexer.tokenize(st.session_state.expression))
+        result = parser.parse(tokens)
+        st.success(f"Infix Result: {result}")
+    except Exception as e:
+        st.error(f"Error: {e}")
 
-else:
-    expression = st.text_input("Enter Expression:")
+if mode_cols[1].button("🔃 Prefix"):
+    try:
+        result = parser.parse_prefix(st.session_state.expression)
+        st.success(f"Prefix Result: {result}")
+    except Exception as e:
+        st.error(f"Error: {e}")
 
-    if st.button("Calculate"):
-        try:
-            if calc_mode == "Infix Notation":
-                lexer = CalcLexer()
-                tokens = iter(lexer.tokenize(expression))
-                result = parser.parse(tokens)
-                st.success(f"Infix Result: {result}")
-
-            elif calc_mode == "Postfix Notation":
-                result = parser.parse_postfix(expression)
-                st.success(f"Postfix Result: {result}")
-
-            elif calc_mode == "Prefix Notation":
-                result = parser.parse_prefix(expression)
-                st.success(f"Prefix Result: {result}")
-
-        except Exception as e:
-            st.error(f"Error: {e}")
+if mode_cols[2].button("🔁 Postfix"):
+    try:
+        result = parser.parse_postfix(st.session_state.expression)
+        st.success(f"Postfix Result: {result}")
+    except Exception as e:
+        st.error(f"Error: {e}")
