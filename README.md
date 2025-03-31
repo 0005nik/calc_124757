@@ -1,73 +1,92 @@
-# calc_124757
+📘 README — Multi-Mode Streamlit Calculator
+Overview
+This is a web-based calculator built using Python, Streamlit, and the SLY (Sly Lex-Yacc) parsing library.
+It supports Infix, Prefix, Postfix, and Simple Calculator modes for evaluating arithmetic expressions.
 
-## Overview
-This is a simple yet powerful calculator built using Streamlit and SLY (Simple Lex-Yacc). The calculator supports:
+Features
+✅ Infix Expression Evaluation using LALR(1) parser
 
-1. **Basic Arithmetic Operations** (Addition, Subtraction, Multiplication, Division)
-2. **Infix Notation** (Standard mathematical expressions like `3 + 4 * 5`)
-3. **Postfix Notation** (Reverse Polish Notation, e.g., `3 4 5 * +`)
-4. **Prefix Notation** (Polish Notation, e.g., `+ 3 * 4 5`)
-5. **Error Handling** for invalid expressions and division by zero.
+✅ Prefix and Postfix Evaluation using stack-based logic
 
-## Features
-- Accepts mathematical expressions in **infix, prefix, and postfix notations**.
-- Automatically detects the notation based on input format.
-- Uses **SLY (Simple Lex-Yacc)** for lexical and syntax analysis.
-- Implements a **stack-based approach** for evaluating prefix and postfix expressions.
-- Provides a **user-friendly interface** using Streamlit.
-- Handles **invalid expressions gracefully** with error messages.
-- Supports **real-time computation** with a clean and interactive UI.
+✅ Simple Calculator for two-number operations
 
-## Installation
-1. Clone the repository:
-   ```sh
-   git clone https://github.com/your-repo/streamlit-calculator.git
-   cd streamlit-calculator
-   ```
-2. Install dependencies:
-   ```sh
-   pip install -r requirements.txt
-   ```
+✅ Modern, colorful UI built with Streamlit
 
-## Usage
-Run the Streamlit application using:
-```sh
-streamlit run app.py
-```
+✅ Robust error handling for invalid expressions and division by zero
 
-## How It Works
-1. **Basic Calculator:**
-   - Enter expressions like `3 + 5`, `10 - 2`, `6 * 7`, `8 / 2`.
-   - Click "Calculate" to see the result.
+Technologies Used
+Python 3.7+
 
-2. **Infix Notation:**
-   - Example: `3 + 4 * 5` (evaluates as `3 + (4 * 5) = 23`).
+Streamlit
 
-3. **Postfix Notation:**
-   - Example: `3 4 5 * +` (evaluates as `3 + (4 * 5) = 23`).
-   - Uses a stack to process operands and operators.
+SLY (Sly Lex-Yacc)
 
-4. **Prefix Notation:**
-   - Example: `+ 3 * 4 5` (evaluates as `3 + (4 * 5) = 23`).
-   - Uses a reversed stack processing method.
+Grammar Definition
+Tokens:
 
-5. **Error Handling:**
-   - Invalid expressions return meaningful error messages.
-   - Division by zero is prevented with a warning message.
+NUMBER: Integer (supports negative)
 
-## Example Calculations
-| Notation  | Expression    | Evaluates To |
-|-----------|--------------|--------------|
-| Infix     | `3 + 4 * 5`  | `23`         |
-| Postfix   | `3 4 5 * +`  | `23`         |
-| Prefix    | `+ 3 * 4 5`  | `23`         |
-| Postfix   | `3 5 4 + *`  | `27`         |
-| Prefix    | `* 3 + 5 4`  | `27`         |
+PLUS: +
 
-## Technologies Used
-- **Python**
-- **Streamlit** (for UI)
-- **SLY** (for lexical and syntax analysis)
+MINUS: -
 
+TIMES: *
 
+DIVIDE: /
 
+LPAREN: (
+
+RPAREN: )
+
+Grammar Rules:
+
+bnf
+Copy
+Edit
+<statement> ::= <expr> | ε
+<expr> ::= <expr> + <expr>
+         | <expr> - <expr>
+         | <expr> * <expr>
+         | <expr> / <expr>
+         | -<expr>
+         | ( <expr> )
+         | NUMBER
+Setup Instructions
+Clone the repository or copy the code
+
+Install dependencies
+
+bash
+Copy
+Edit
+pip install streamlit sly
+Run the app
+
+bash
+Copy
+Edit
+streamlit run your_script_name.py
+**How to Use
+Choose a mode from the dropdown:
+
+Simple Calculator (Enter two numbers and choose an operator)
+
+Infix Notation (e.g., (3 + 4) * 2)
+
+Prefix Notation (e.g., + 3 * 4 2)
+
+Postfix Notation (e.g., 3 4 2 * +)
+
+Input your expression or numbers.
+
+Press Calculate to see the result.
+
+File Structure
+bash
+Copy
+Edit
+├── calculator.py           # Main Streamlit application
+├── Calculator_Application_Report.docx  # Formal report (theory + explanation)
+├── README.md               # Project instructions and details
+**
+      
