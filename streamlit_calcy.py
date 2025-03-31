@@ -6,19 +6,58 @@ from sly import Lexer, Parser
 st.markdown(
     """
     <style>
-    .main {
-        background-color: #fdf6e3;
-        font-family: 'Comic Sans MS', cursive;
+    html, body, [class*="css"] {
+        font-family: 'Segoe UI', sans-serif;
+        background-color: #fefce8;
     }
+
+    h1, h3 {
+        color: #1e293b;
+    }
+
     .stTextInput > div > div > input {
-        background-color: #fffbe6;
-        border: 2px solid #f39c12;
-        color: #2c3e50;
+        background-color: #fff;
+        border: 2px solid #fbbf24;
+        padding: 10px;
+        border-radius: 8px;
+        color: #1e293b;
+        font-size: 16px;
     }
+
     .stButton > button {
-        background-color: #f39c12;
+        background-color: #f59e0b;
         color: white;
         font-weight: bold;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+    }
+
+    .stButton > button:hover {
+        background-color: #d97706;
+    }
+
+    .stMarkdown {
+        font-size: 18px;
+    }
+
+    .result-box {
+        background-color: #ecfccb;
+        padding: 16px;
+        border-left: 5px solid #65a30d;
+        border-radius: 8px;
+        font-weight: bold;
+        color: #365314;
+    }
+
+    .error-box {
+        background-color: #fee2e2;
+        padding: 16px;
+        border-left: 5px solid #dc2626;
+        border-radius: 8px;
+        font-weight: bold;
+        color: #991b1b;
     }
     </style>
     """,
@@ -54,10 +93,6 @@ class CalcParser(Parser):
     @_('expr')
     def statement(self, p):
         return p.expr
-
-    @_('')
-    def statement(self, p):
-        return None
 
     @_('expr PLUS expr')
     def expr(self, p):
@@ -122,8 +157,8 @@ class CalcParser(Parser):
         return stack[0] if stack else "❌ Error: Invalid Expression"
 
 # ---- 🎨 Streamlit UI ----
-st.markdown("<h1 style='text-align:center;'>🧮✨ PLC Calculator 🎈</h1>", unsafe_allow_html=True)
-st.markdown("### 💬")
+st.markdown("<h1 style='text-align:center;'>🧮 PLC Calculator 🎈</h1>", unsafe_allow_html=True)
+st.markdown("### 💬 Enter an expression (Infix, Prefix, or Postfix):")
 
 expression = st.text_input("🔢 Your Expression")
 
@@ -134,18 +169,17 @@ if st.button("🚀 Calculate"):
         if ' ' in expression:
             if expression.strip().startswith(('+', '-', '*', '/')):
                 result = parser.parse_prefix(expression)
-                st.success(f"🧠 **Prefix Result**: `{result}`")
+                st.markdown(f"<div class='result-box'>🧠 <strong>Prefix Result</strong>: {result}</div>", unsafe_allow_html=True)
             else:
                 result = parser.parse_postfix(expression)
-                st.success(f"📦 **Postfix Result**: `{result}`")
+                st.markdown(f"<div class='result-box'>📦 <strong>Postfix Result</strong>: {result}</div>", unsafe_allow_html=True)
         else:
             tokens = iter(lexer.tokenize(expression))
             result = parser.parse(tokens)
-            st.success(f"📘 **Infix Result**: `{result}`")
+            st.markdown(f"<div class='result-box'>📘 <strong>Infix Result</strong>: {result}</div>", unsafe_allow_html=True)
     except Exception as e:
-        st.error(f"🚫 Something went wrong: `{e}`")
+        st.markdown(f"<div class='error-box'>🚫 Something went wrong: {e}</div>", unsafe_allow_html=True)
 
 st.markdown("---")
-st.markdown("🧑‍💻 _Supports Infix like `2+3`, Prefix like `+ 2 3`, and Postfix like `2 3 +`_")
-st.markdown("💖 Created with love for math nerds 🎓")
-
+st.markdown("🧑‍💻 _Supports Infix (`2+3`), Prefix (`+ 2 3`), and Postfix (`2 3 +`)_")
+st.markdown("💖 Made for Math Enthusiasts with ✨")
