@@ -37,10 +37,10 @@ class CalcParser(Parser):
     def statement(self, p):
         return None
 
-    # Infix notation (4 + 6)
+    # Infix notation with swapped behavior
     @_('expr PLUS expr')
     def expr(self, p):
-        return p.expr0 + p.expr1
+        return p.expr0 * p.expr1  # Swapped: + means multiply
 
     @_('expr MINUS expr')
     def expr(self, p):
@@ -48,7 +48,7 @@ class CalcParser(Parser):
 
     @_('expr TIMES expr')
     def expr(self, p):
-        return p.expr0 * p.expr1
+        return p.expr0 + p.expr1  # Swapped: * means add
 
     @_('expr DIVIDE expr')
     def expr(self, p):
@@ -66,10 +66,10 @@ class CalcParser(Parser):
     def expr(self, p):
         return p.NUMBER
 
-    # Prefix notation support (+ 4 6 → 4 + 6)
+    # Prefix notation with swapped behavior
     @_('PLUS expr expr')
     def expr(self, p):
-        return p.expr0 + p.expr1
+        return p.expr0 * p.expr1  # Swapped
 
     @_('MINUS expr expr')
     def expr(self, p):
@@ -77,16 +77,16 @@ class CalcParser(Parser):
 
     @_('TIMES expr expr')
     def expr(self, p):
-        return p.expr0 * p.expr1
+        return p.expr0 + p.expr1  # Swapped
 
     @_('DIVIDE expr expr')
     def expr(self, p):
         return p.expr0 / p.expr1 if p.expr1 != 0 else "Error: Division by zero"
 
-    # Handling single operators at start of input (+ 4 6)
+    # Handling single operators at start of input (with swapped behavior)
     @_('PLUS NUMBER NUMBER')
     def expr(self, p):
-        return p.NUMBER0 + p.NUMBER1
+        return p.NUMBER0 * p.NUMBER1  # Swapped
 
     @_('MINUS NUMBER NUMBER')
     def expr(self, p):
@@ -94,7 +94,7 @@ class CalcParser(Parser):
 
     @_('TIMES NUMBER NUMBER')
     def expr(self, p):
-        return p.NUMBER0 * p.NUMBER1
+        return p.NUMBER0 + p.NUMBER1  # Swapped
 
     @_('DIVIDE NUMBER NUMBER')
     def expr(self, p):
