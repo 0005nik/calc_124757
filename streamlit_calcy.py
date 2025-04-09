@@ -19,7 +19,7 @@ class CalcLexer(Lexer):
         t.value = int(t.value)
         return t
 
-# Parser (Syntax Analysis) supporting Prefix and Infix Notation
+# Parser (Syntax Analysis) with Translation
 class CalcParser(Parser):
     tokens = CalcLexer.tokens
 
@@ -37,26 +37,28 @@ class CalcParser(Parser):
     def statement(self, p):
         return None
 
-    # Infix notation with swapped behavior
+    # Infix notation
     @_('expr PLUS expr')
     def expr(self, p):
-        return p.expr0 * p.expr1  # Swapped: + means multiply
+        return (p.expr0[0] + p.expr1[0], f"({p.expr0[1]} + {p.expr1[1]})")
 
     @_('expr MINUS expr')
     def expr(self, p):
-        return p.expr0 - p.expr1
+        return (p.expr0[0] - p.expr1[0], f"({p.expr0[1]} - {p.expr1[1]})")
 
     @_('expr TIMES expr')
     def expr(self, p):
-        return p.expr0 + p.expr1  # Swapped: * means add
+        return (p.expr0[0] * p.expr1[0], f"({p.expr0[1]} * {p.expr1[1]})")
 
     @_('expr DIVIDE expr')
     def expr(self, p):
-        return p.expr0 / p.expr1 if p.expr1 != 0 else "Error: Division by zero"
+        if p.expr1[0] == 0:
+            return ("Error: Division by zero", "undefined")
+        return (p.expr0[0] / p.expr1[0], f"({p.expr0[1]} / {p.expr1[1]})")
 
     @_('MINUS expr %prec UMINUS')
     def expr(self, p):
-        return -p.expr
+        return (-p.expr[0], f"(-{p.expr[1]})")
 
     @_('LPAREN expr RPAREN')
     def expr(self, p):
@@ -64,41 +66,45 @@ class CalcParser(Parser):
 
     @_('NUMBER')
     def expr(self, p):
-        return p.NUMBER
+        return (p.NUMBER, str(p.NUMBER))
 
-    # Prefix notation with swapped behavior
+    # Prefix notation support (+ 4 6 → 4 + 6)
     @_('PLUS expr expr')
     def expr(self, p):
-        return p.expr0 * p.expr1  # Swapped
+        return (p.expr0[0] + p.expr1[0], f"({p.expr0[1]} + {p.expr1[1]})")
 
     @_('MINUS expr expr')
     def expr(self, p):
-        return p.expr0 - p.expr1
+        return (p.expr0[0] - p.expr1[0], f"({p.expr0[1]} - {p.expr1[1]})")
 
     @_('TIMES expr expr')
     def expr(self, p):
-        return p.expr0 + p.expr1  # Swapped
+        return (p.expr0[0] * p.expr1[0], f"({p.expr0[1]} * {p.expr1[1]})")
 
     @_('DIVIDE expr expr')
     def expr(self, p):
-        return p.expr0 / p.expr1 if p.expr1 != 0 else "Error: Division by zero"
+        if p.expr1[0] == 0:
+            return ("Error: Division by zero", "undefined")
+        return (p.expr0[0] / p.expr1[0], f"({p.expr0[1]} / {p.expr1[1]})")
 
-    # Handling single operators at start of input (with swapped behavior)
+    # Prefix: raw numbers
     @_('PLUS NUMBER NUMBER')
     def expr(self, p):
-        return p.NUMBER0 * p.NUMBER1  # Swapped
+        return (p.NUMBER0 + p.NUMBER1, f"({p.NUMBER0} + {p.NUMBER1})")
 
     @_('MINUS NUMBER NUMBER')
     def expr(self, p):
-        return p.NUMBER0 - p.NUMBER1
+        return (p.NUMBER0 - p.NUMBER1, f"({p.NUMBER0} - {p.NUMBER1})")
 
     @_('TIMES NUMBER NUMBER')
     def expr(self, p):
-        return p.NUMBER0 + p.NUMBER1  # Swapped
+        return (p.NUMBER0 * p.NUMBER1, f"({p.NUMBER0} * {p.NUMBER1})")
 
     @_('DIVIDE NUMBER NUMBER')
     def expr(self, p):
-        return p.NUMBER0 / p.NUMBER1 if p.NUMBER1 != 0 else "Error: Division by zero"
+        if p.NUMBER1 == 0:
+            return ("Error: Division by zero", "undefined")
+        return (p.NUMBER0 / p.NUMBER1, f"({p.NUMBER0} / {p.NUMBER1})")
 
 # Streamlit UI
 st.set_page_config(page_title="PPI Calculator", page_icon="🧮", layout="centered")
@@ -115,7 +121,12 @@ if st.button("Calculate 🧮"):
         tokens = iter(lexer.tokenize(expression))
         result = parser.parse(tokens)
         if result is not None:
-            st.success(f"✅ Result: {result}")
+            value, infix_str = result
+            if isinstance(value, str) and value.startswith("Error"):
+                st.error(f"❌ {value}")
+            else:
+                st.success(f"✅ Result: {value}")
+                st.info(f"📝 Translated to: `{infix_str}`")
         else:
             st.error("❌ Invalid expression!")
     except Exception as e:
